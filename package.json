@@ -9,8 +9,10 @@
   },
   "dependencies": {
     "@tanstack/react-router": "^1.120.5",
+    "@vercel/analytics": "^2.0.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "three": "^0.160.1"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",

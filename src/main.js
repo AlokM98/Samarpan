@@ -3,17 +3,19 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/addons/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
 
-import { createMoon } from "./scene/moon.js?v=2";
-import { createFancyChalni } from "./scene/fancyChalni.js?v=2";
+import { createMoon } from "./scene/moon.js";
+import { createFancyChalni } from "./scene/fancyChalni.js";
 import { loadScannedBridalHand } from "./scene/scannedHand.js";
-import { createDiya } from "./scene/diya.js?v=2";
+import { createDiya } from "./scene/diya.js";
 import { createStarfield } from "./scene/stars.js";
-import { ScrollController } from "./utils/scroll.js";
 import { lerp, smoothstep } from "./utils/math.js";
-import { createUiController } from "./ui.js";
 
-const canvas = document.getElementById("scene-canvas");
 const isCompactViewport = () => window.innerWidth < 700;
+
+export function createAnimation(canvas) {
+  let progress = 0;
+  let destroyed = false;
+  let animationFrame = 0;
 
 // --- Core scene setup ---------------------------------------------------
 const scene = new THREE.Scene();
@@ -139,17 +141,17 @@ composer.addPass(bloomPass);
 const usePostProcessing = !isCompactViewport();
 
 // --- Scroll-driven animation timeline --------------------------------------
-const scrollController = new ScrollController();
-const uiController = createUiController();
 
 const clock = new THREE.Clock();
 
 // Gentle mouse parallax
 const pointer = { x: 0, y: 0 };
-window.addEventListener("pointermove", (event) => {
+function onPointerMove(event) {
   pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
   pointer.y = (event.clientY / window.innerHeight) * 2 - 1;
-});
+}
+
+window.addEventListener("pointermove", onPointerMove);
 
 function animateForeground(progress) {
   // Hand lowers and swings chalni down and away to the right,
@@ -222,13 +224,11 @@ window.addEventListener("resize", onResize);
 
 function tick() {
   const elapsed = clock.getElapsedTime();
-  const progress = scrollController.update();
 
   starfield.update(elapsed);
   diya.update(elapsed);
   animateForeground(progress);
   animateMoon(progress);
-  uiController.update(progress);
 
   // Subtle natural camera sway / parallax
   camera.position.x += (pointer.x * 0.25 - camera.position.x * 0.02) * 0.05;
@@ -238,7 +238,24 @@ function tick() {
   // fully animated, but scrolling no longer competes with post-processing.
   if (usePostProcessing) composer.render();
   else renderer.render(scene, camera);
-  requestAnimationFrame(tick);
+  if (!destroyed) animationFrame = requestAnimationFrame(tick);
 }
 
 tick();
+
+  return {
+    setProgress(value) {
+      if (typeof value === "number" && Number.isFinite(value)) {
+        progress = Math.min(1, Math.max(0, value));
+      }
+    },
+    destroy() {
+      destroyed = true;
+      cancelAnimationFrame(animationFrame);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("pointermove", onPointerMove);
+      renderer.dispose();
+      composer.dispose();
+    },
+  };
+}

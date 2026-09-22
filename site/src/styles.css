@@ -22,8 +22,12 @@ a { color:inherit; text-decoration:none; }
 .site-header nav a:hover,.site-footer a:hover,.text-link:hover { color:var(--gold); }
 .header-order { border-bottom:1px solid var(--gold); color:var(--gold); font-size:.9rem; padding-bottom:.25rem; }
 .site-header a:focus-visible,.button:focus-visible,.text-link:focus-visible { outline:2px solid var(--gold); outline-offset:4px; }
-.animation-shell { background:#07080e; height:400vh; position:relative; }
-#animation-frame { border:0; display:block; height:100vh; pointer-events:none; position:sticky; top:0; user-select:none; width:100%; }
+.animation-shell { background:#07080e; height:400vh; overflow:clip; position:relative; }
+#scene-canvas { display:block; height:100vh; left:0; position:sticky; top:0; width:100%; z-index:0; }
+.animation-overlay { align-items:center; display:flex; height:100vh; justify-content:center; margin-top:-100vh; pointer-events:none; position:sticky; text-align:center; top:0; z-index:1; }
+.animation-copy { max-width:90vw; position:absolute; transition:opacity .2s linear; }
+.animation-copy h1 { color:var(--paper); }
+.animation-copy .hint { color:rgba(245,234,208,.85); font-style:italic; margin-top:1.2rem; }
 .animation-exit { bottom:1.5rem; color:rgba(245,234,208,.86); font-size:.95rem; font-style:italic; left:50%; letter-spacing:.05em; padding:.6rem 1rem; position:absolute; transform:translateX(-50%); z-index:2; }
 .animation-exit:hover { color:var(--gold); }
 .ui-block { max-width:90vw; position:absolute; transition:opacity .4s ease; }

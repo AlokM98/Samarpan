@@ -7,6 +7,11 @@ export class ScrollController {
     this.smoothing = smoothing;
 
     window.addEventListener("scroll", () => this._onScroll(), { passive: true });
+    window.addEventListener("samarpan-scroll", (event) => {
+      const progress = event.detail;
+      if (typeof progress !== "number" || !Number.isFinite(progress)) return;
+      this.rawProgress = Math.min(1, Math.max(0, progress));
+    });
     this._onScroll();
   }
 
