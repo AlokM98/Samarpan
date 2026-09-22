@@ -19,12 +19,13 @@ const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x05070f, 0.006);
 
 const camera = new THREE.PerspectiveCamera(
-  48,
+  window.innerWidth < 700 ? 56 : 48,
   window.innerWidth / window.innerHeight,
   0.1,
   300
 );
 camera.position.set(0, 0.2, 4.5);
+const viewport = { compact: window.innerWidth < 700 };
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -102,6 +103,18 @@ loadHandAfterFirstPaint();
 foregroundRig.position.set(0, -0.18, 1.35);
 scene.add(foregroundRig);
 
+function updateViewportProfile() {
+  viewport.compact = window.innerWidth < 700;
+  camera.fov = viewport.compact ? 56 : 48;
+  camera.updateProjectionMatrix();
+  // Portrait screens have much less horizontal room. Scale the complete
+  // foreground composition so chalni, diya, and hand keep their relationship.
+  foregroundRig.scale.setScalar(viewport.compact ? 0.62 : 1);
+
+
+}
+updateViewportProfile();
+
 // 3. Twinkling starfield
 const starfield = createStarfield();
 scene.add(starfield.points);
@@ -136,8 +149,8 @@ function animateForeground(progress) {
   const moveProg = smoothstep(0.0, 0.85, progress);
 
   foregroundRig.position.x = lerp(0, 5.2, moveProg);
-  foregroundRig.position.y = lerp(0.1, -4.2, moveProg);
-  foregroundRig.position.z = lerp(1.2, -0.6, moveProg);
+  foregroundRig.position.y = lerp(0.1, viewport.compact ? -3.7 : -4.2, moveProg);
+  foregroundRig.position.z = lerp(1.2, viewport.compact ? -0.25 : -0.6, moveProg);
 
   // Natural hand wrist rotation as she lowers the chalni
   foregroundRig.rotation.z = lerp(0, -0.6, moveProg);
@@ -179,7 +192,7 @@ function animateForeground(progress) {
 function animateMoon(progress) {
   // As chalni lowers, camera gently pushes toward the moon & bloom deepens
   const reveal = smoothstep(0.3, 1.0, progress);
-  camera.position.z = lerp(4.5, 2.8, reveal);
+  camera.position.z = lerp(viewport.compact ? 5.4 : 4.5, viewport.compact ? 3.5 : 2.8, reveal);
   camera.position.y = lerp(0.2, 0.5, reveal);
   bloomPass.strength = lerp(0.9, 1.6, reveal);
   moon.light.intensity = lerp(2.2, 3.4, reveal);
@@ -189,6 +202,7 @@ function animateMoon(progress) {
 function onResize() {
   const width = window.innerWidth;
   const height = window.innerHeight;
+  updateViewportProfile();
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);

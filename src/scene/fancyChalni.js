@@ -322,7 +322,7 @@ export function createFancyChalni({ radius = 1.7 } = {}) {
   // read like a lightweight decorative applique rather than a second object.
   let emblem;
   const emblemHeight = 0.68;
-  const emblemTexture = textureLoader.load("./assets/chalni-emblem.png", (texture) => {
+  const emblemTexture = textureLoader.load("./assets/favicon.png", (texture) => {
     // Read the real asset dimensions instead of assuming an aspect ratio.
     // This stays correct if the transparent PNG is replaced later.
     const aspectRatio = texture.image.width / texture.image.height;

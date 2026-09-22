@@ -87,6 +87,18 @@ h1 {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
 }
 
+@media (max-width: 700px) {
+  #overlay { padding: 0 1rem; }
+  .ui-block { max-width: 94vw; }
+  .eyebrow { font-size: .72rem; letter-spacing: .2em; }
+  .hint { font-size: .95rem; max-width: 290px; margin-left: auto; margin-right: auto; }
+  h1 { font-size: clamp(1.65rem, 8vw, 2.5rem); }
+}
+
+@media (max-width: 380px) {
+  .hint { font-size: .88rem; }
+}
+
 /* For main titles and brand headers */
 .brand-title {
 

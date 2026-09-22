@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Vite/TypeScript production output
+dist/
+*.tsbuildinfo
+
+# Generated static mirror of the standalone animation
+public/animation/
+public/assets/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs and local tooling output
+*.log
+.cache/
+.tmp/
+coverage/
