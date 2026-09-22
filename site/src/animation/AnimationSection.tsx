@@ -6,8 +6,12 @@ type AnimationController = {
 };
 
 function getProgress(element: HTMLElement) {
-  const bounds = element.getBoundingClientRect();
-  return Math.max(0, Math.min(1, -bounds.top / Math.max(1, bounds.height - window.innerHeight)));
+  // Use document coordinates instead of only the viewport rect. Mobile Safari
+  // changes the visual viewport while its address bar expands/collapses, which
+  // can otherwise leave the animation at its last progress value.
+  const sectionTop = element.getBoundingClientRect().top + window.scrollY;
+  const distance = Math.max(1, element.offsetHeight - window.innerHeight);
+  return Math.max(0, Math.min(1, (window.scrollY - sectionTop) / distance));
 }
 
 export function AnimationSection() {
@@ -47,6 +51,9 @@ export function AnimationSection() {
 
     window.addEventListener("scroll", sync, { passive: true });
     window.addEventListener("resize", sync);
+    window.addEventListener("orientationchange", sync);
+    window.addEventListener("scrollend", sync, { passive: true });
+    window.visualViewport?.addEventListener("resize", sync);
     sync();
 
     return () => {
@@ -54,6 +61,9 @@ export function AnimationSection() {
       disposed = true;
       window.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
+      window.removeEventListener("orientationchange", sync);
+      window.removeEventListener("scrollend", sync);
+      window.visualViewport?.removeEventListener("resize", sync);
       animation?.destroy();
     };
   }, []);
