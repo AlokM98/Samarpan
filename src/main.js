@@ -13,6 +13,7 @@ import { lerp, smoothstep } from "./utils/math.js";
 import { createUiController } from "./ui.js";
 
 const canvas = document.getElementById("scene-canvas");
+const isCompactViewport = () => window.innerWidth < 700;
 
 // --- Core scene setup ---------------------------------------------------
 const scene = new THREE.Scene();
@@ -27,8 +28,14 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.set(0, 0.2, 4.5);
 const viewport = { compact: window.innerWidth < 700 };
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  // MSAA plus bloom is unnecessarily expensive on small touch devices.
+  // The lower pixel count is a much better trade-off than dropped frames.
+  antialias: !isCompactViewport(),
+  alpha: false,
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, isCompactViewport() ? 1 : 1.75));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
@@ -129,6 +136,7 @@ const bloomPass = new UnrealBloomPass(
   0.42  // threshold - keep crater texture visible while halo glows
 );
 composer.addPass(bloomPass);
+const usePostProcessing = !isCompactViewport();
 
 // --- Scroll-driven animation timeline --------------------------------------
 const scrollController = new ScrollController();
@@ -206,6 +214,7 @@ function onResize() {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isCompactViewport() ? 1 : 1.75));
   composer.setSize(width, height);
   bloomPass.setSize(width, height);
 }
@@ -225,7 +234,10 @@ function tick() {
   camera.position.x += (pointer.x * 0.25 - camera.position.x * 0.02) * 0.05;
   camera.lookAt(0, 0.3, -30);
 
-  composer.render();
+  // Avoid the extra render pass used by bloom on mobile. The scene remains
+  // fully animated, but scrolling no longer competes with post-processing.
+  if (usePostProcessing) composer.render();
+  else renderer.render(scene, camera);
   requestAnimationFrame(tick);
 }
 

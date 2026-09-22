@@ -20,18 +20,24 @@ function AnimationPlugin() {
 
   useEffect(() => {
     const frame = frameRef.current;
+    let frameRequest = 0;
     const sync = () => {
-      const shell = shellRef.current;
-      if (!shell || !frame) return;
-      const bounds = shell.getBoundingClientRect();
-      const progress = Math.max(0, Math.min(1, -bounds.top / Math.max(1, bounds.height - window.innerHeight)));
-      frame.contentWindow?.postMessage({ type: "samarpan-scroll", progress }, window.location.origin);
+      if (frameRequest) return;
+      frameRequest = window.requestAnimationFrame(() => {
+        frameRequest = 0;
+        const shell = shellRef.current;
+        if (!shell || !frame) return;
+        const bounds = shell.getBoundingClientRect();
+        const progress = Math.max(0, Math.min(1, -bounds.top / Math.max(1, bounds.height - window.innerHeight)));
+        frame.contentWindow?.postMessage({ type: "samarpan-scroll", progress }, window.location.origin);
+      });
     };
     window.addEventListener("scroll", sync, { passive: true });
     window.addEventListener("resize", sync);
     frame?.addEventListener("load", sync);
     sync();
     return () => {
+      if (frameRequest) window.cancelAnimationFrame(frameRequest);
       window.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
       frame?.removeEventListener("load", sync);

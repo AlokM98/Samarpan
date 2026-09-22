@@ -1,7 +1,7 @@
 // Maps window scroll position to a smoothed 0..1 progress value.
 // Kept dependency-free (no GSAP) - just a simple lerp-towards-target each frame.
 export class ScrollController {
-  constructor({ smoothing = 0.08 } = {}) {
+  constructor({ smoothing = 0.12 } = {}) {
     this.rawProgress = 0;
     this.progress = 0;
     this.smoothing = smoothing;
